@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<link href="/jquery/bootstrap_3.3.0/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+<script type="text/javascript" src="/jquery/jquery-1.11.1-min.js"></script>
+<script type="text/javascript" src="/jquery/bootstrap_3.3.0/js/bootstrap.min.js"></script>
+
+<script type="text/javascript">
+
+	//默认情况下取消和保存按钮是隐藏的
+	var cancelAndSaveBtnDefault = true;
+
+	var search = window.location.search;
+	var clueId = decodeURI(search.substring(search.indexOf('=')+1));
+
+	$(function(){
+		$("#remark").focus(function(){
+			if(cancelAndSaveBtnDefault){
+				//设置remarkDiv的高度为130px
+				$("#remarkDiv").css("height","130px");
+				//显示
+				$("#cancelAndSaveBtn").show("2000");
+				cancelAndSaveBtnDefault = false;
+			}
+		});
+
+		$("#cancelBtn").click(function(){
+			//显示
+			$("#cancelAndSaveBtn").hide();
+			//设置remarkDiv的高度为130px
+			$("#remarkDiv").css("height","90px");
+			cancelAndSaveBtnDefault = true;
+		});
+
+		$(".remarkDiv").mouseover(function(){
+			$(this).children("div").children("div").show();
+		});
+
+		$(".remarkDiv").mouseout(function(){
+			$(this).children("div").children("div").hide();
+		});
+
+		$(".myHref").mouseover(function(){
+			$(this).children("span").css("color","red");
+		});
+
+		$(".myHref").mouseout(function(){
+			$(this).children("span").css("color","#E6E6E6");
+		});
+
+		detail()
+		getRelation()
+
+		/*点击关联关系事件*/
+		$("#addRelation").click(function () {
+			getActivity(null);
+		})
+
+		/*搜索框*/
+		$("#search").blur(function () {
+			getActivity($.trim($("#search").val()));
+		})
+
+		/*添加关联模态框上复选框*/
+		$("#activityBody").on("click","input[name='check']",function () {
+			$("#checkall").prop('checked',$("input[name='check']").length==$("input[name='check']:checked").length);
+		})
+		$("#checkall").click(function () {
+			$("input[name='check']").prop('checked',this.checked);
+		})
+
+		$("#relationSave").click(function () {
+			addRelation();
+		})
+	});
+
+	/**
+	 * 保存关联市场活动
+	 */
+	function addRelation() {
+		var $input = $("input[name='check']:checked");
+		var ids = new Array();
+		$.each($input,function () {
+			ids.push($(this).val());
+		})
+		$.ajax({
+			url:'/clue/addrelation',
+			type:'get',
+			data:{
+				studentid:clueId,
+				ids:ids
+			},
+			dataType:'json',
+			success:function(obj){
+				console.log(obj)
+				getRelation();
+				$("#bundModal").modal("hide");
+			}
+		})
+	}
+	function getActivity(search) {
+		$.ajax({
+			url:'/clue/activitys',
+			type:'get',
+			data:{
+				search:search
+			},
+			dataType:'json',
+			success:function(obj){
+				if (obj.message == "OK"){
+					var items = obj.data;
+					var html = '';
+					$.each(items,function () {
+						html+='<tr>';
+						html+='<td><input type="checkbox" name="check" value="'+this.id+'"/></td>';
+						html+='<td>'+this.coursename+'</td>';
+						html+='<td>'+this.startdate+'</td>';
+						html+='<td>'+this.enddate+'</td>';
+						html+='</tr>';
+					})
+					$("#activityBody").empty();//清空子节点
+					$("#activityBody").append(html);
+					$("#bundModal").modal("show");
+				}
+			}
+
+		})
+	}
+
+	function detail() {
+		$.ajax({
+			url:'/clue/item',
+			type:'get',
+			data:{
+				studentId:clueId
+			},
+			dataType:'json',
+			success:function(obj){
+				if (obj.message=="OK"){
+					var item = obj.data;
+					$("#detail-fullname").text(item.name);
+					$("#detail-website").text(item.QQ);
+					$("#detail-edittime").text(item.edittime);
+					$("#detail-createtime").text(item.createtime);
+					$("#detail-company").text(item.classandgrade);
+					$("#detail-job").text(item.duty);
+					$("#detail-email").text(item.email);
+					$("#detail-phone").text(item.phone);
+					$("#detail-desc").text(item.description);
+					$("#detail-nextcontacttime").text(item.brith);
+					$("#detail-address").text(item.address);
+				}
+			}
+
+		})
+	}
+
+	/**
+	 * 查询关联关系
+	 */
+	function getRelation() {
+		$.ajax({
+			url:'/clue/relation',
+			type:'get',
+			data:{
+				studentId:clueId
+			},
+			dataType:'json',
+			success:function(obj){
+				if (obj.message =="OK"){
+					var items = obj.data;
+					var html = '';
+					$.each(items,function () {
+						html+='<tr>';
+						html+='<td>'+this.coursename+'</td>';
+						html+='<td>'+this.startdate+'</td>';
+						html+='<td>'+this.enddate+'</td>';
+						html+='<td><a href="javascript:void(0);" onclick="removeRelation(\''+this.id+'\')"  style="text-decoration: none;"><span class="glyphicon glyphicon-remove"></span>解除关联</a></td>';
+						html+='</tr>';
+					})
+					$("#relationBody").html(html);
+				}
+			}
+
+		})
+	}
+
+	function removeRelation(activityId) {
+		$.ajax({
+			url:'/clue/delrelation',
+			type:'get',
+			data:{
+				studentId:clueId,
+				courseId:activityId
+			},
+			dataType:'json',
+			success:function(obj){
+				getRelation();
+			}
+
+		})
+	}
+
+</script>
+
+</head>
+<body>
+
+<!-- 关联市场活动的模态窗口 -->
+<div class="modal fade" id="bundModal" role="dialog">
+	<div class="modal-dialog" role="document" style="width: 80%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal">
+					<span aria-hidden="true">×</span>
+				</button>
+				<h4 class="modal-title">选择学生课程</h4>
+			</div>
+			<div class="modal-body">
+				<div class="btn-group" style="position: relative; top: 18%; left: 8px;">
+					<form class="form-inline" role="form">
+						<div class="form-group has-feedback">
+							<input type="text" class="form-control" style="width: 300px;" placeholder="请输入课程名称，支持模糊查询" id="search">
+							<span class="glyphicon glyphicon-search form-control-feedback"></span>
+						</div>
+					</form>
+				</div>
+				<table id="activityTable" class="table table-hover" style="width: 900px; position: relative;top: 10px;">
+					<thead>
+					<tr style="color: #B3B3B3;">
+						<td><input type="checkbox" id="checkall"/></td>
+						<td>名称</td>
+						<td>开始日期</td>
+						<td>结束日期</td>
+						<td></td>
+					</tr>
+					</thead>
+					<tbody id="activityBody">
+					</tbody>
+				</table>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+				<button type="button" class="btn btn-primary" id="relationSave">选择</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+<!-- 返回按钮 -->
+<div style="position: relative; top: 35px; left: 10px;">
+	<a href="javascript:void(0);" onclick="window.history.back();"><span class="glyphicon glyphicon-arrow-left" style="font-size: 20px; color: #DDDDDD"></span></a>
+</div>
+
+<!-- 大标题 -->
+<div style="position: relative; left: 40px; top: -30px;">
+	<div class="page-header">
+		<h3><span ></span> <small ></small></h3>
+	</div>
+</div>
+
+<!-- 详细信息 -->
+<div style="position: relative; top: -31px;">
+	<div style="position: relative; left: 40px; height: 30px;">
+		<div style="width: 300px; color: gray;">姓名</div>
+		<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="detail-fullname"></b></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 10px;">
+		<div style="width: 300px; color: gray;">班级</div>
+		<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="detail-company"></b></div>
+		<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">职位</div>
+		<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="detail-job"></b></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 20px;">
+		<div style="width: 300px; color: gray;">邮箱</div>
+		<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="detail-email"></b></div>
+		<div style="width: 300px;position: relative; left: 450px; top: -40px; color: gray;">手机号</div>
+		<div style="width: 300px;position: relative; left: 650px; top: -60px;"><b id="detail-phone"></b></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px;"></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -60px; left: 450px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 30px;">
+		<div style="width: 300px; color: gray;">QQ</div>
+		<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="detail-website"></b></div>
+		<div style="height: 1px; width: 400px;  position: relative; top: -60px;"></div>
+
+		<div style="height: 1px; width: 400px;  position: relative; top: -60px; left: 450px;"></div>
+
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 50px;">
+		<div style="width: 300px; color: gray;">创建时间</div>
+		<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="detail-createtime"></b></div>
+		<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -65px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 60px;">
+		<div style="width: 300px; color: gray;">修改时间</div>
+		<div style="width: 500px;position: relative; left: 200px; top: -20px;"><b id="detail-edittime"></b></div>
+		<div style="height: 1px; width: 550px; background: #D5D5D5; position: relative; top: -20px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 70px;">
+		<div style="width: 300px; color: gray;">描述</div>
+		<div style="width: 630px;position: relative; left: 200px; top: -20px;">
+			<b id="detail-desc">
+
+			</b>
+		</div>
+		<div style="height: 1px; width: 850px; background: #D5D5D5; position: relative; top: -20px;"></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 90px;">
+		<div style="width: 300px; color: gray;">出生日期</div>
+		<div style="width: 300px;position: relative; left: 200px; top: -20px;"><b id="detail-nextcontacttime"></b></div>
+		<div style="height: 1px; width: 400px; background: #D5D5D5; position: relative; top: -20px; "></div>
+	</div>
+	<div style="position: relative; left: 40px; height: 30px; top: 100px;">
+		<div style="width: 300px; color: gray;">家庭住址</div>
+		<div style="width: 630px;position: relative; left: 200px; top: -20px;">
+			<b id="detail-address">
+
+			</b>
+		</div>
+		<div style="height: 1px; width: 850px; background: #D5D5D5; position: relative; top: -20px;"></div>
+	</div>
+</div>
+
+
+
+<!-- 课程 -->
+<div>
+	<div style="position: relative; top: 60px; left: 40px;">
+		<div class="page-header">
+			<h4>课程</h4>
+		</div>
+		<div style="position: relative;top: 0px;">
+			<table class="table table-hover" style="width: 900px;">
+				<thead>
+				<tr style="color: #B3B3B3;">
+					<td>课程名称</td>
+					<td>开始日期</td>
+					<td>结束日期</td>
+					<td></td>
+				</tr>
+				</thead>
+				<tbody id="relationBody">
+
+				</tbody>
+			</table>
+		</div>
+
+		<div>
+			<a href="javascript:void(0);" data-toggle="modal" id="addRelation" style="text-decoration: none;"><span class="glyphicon glyphicon-plus"></span>选择课程</a>
+		</div>
+	</div>
+</div>
+
+
+<div style="height: 200px;"></div>
+</body>
+</html>
