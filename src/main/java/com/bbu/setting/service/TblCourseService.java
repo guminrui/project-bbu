@@ -12,7 +12,7 @@ public interface TblCourseService {
 
 
     void addItem(TblCourse tblCourse);
-    ResultPage pageItem(int pageSize, int pageNo, String name, String owner, String startdate, String enddate);
+    ResultPage pageItem(int pageSize, int pageNo, String name,String startdate, String enddate);
     void delItem(String[] ids);
     Map getByItem(String id);
     void editItem(TblCourse tblCourse);

@@ -7,6 +7,7 @@ import com.bbu.util.ResultPage;
 
 
 import java.util.List;
+import java.util.Map;
 
 public interface TblStudentService {
     /**
@@ -27,21 +28,12 @@ public interface TblStudentService {
 
 
     void addRelation(String[] ids, String studentId);
+    Map getByItem(String id);
 
+    void editItem(TblStudent tblStudent );
 
     void delRelation(String studentId, String courseId);
-    /*
 
+    void delItem(String[] ids);
 
-
-    *//**
-     * 查询市场活动与线索关联
-     *//*
-    List<TblCourse> getConvertAct(String studentId, String search);
-
-*/
-//    /**
-//     * 转换按钮
-//     */
-//    void convert(String createby, String clueId, String money, String tranName, String expecteddate, String stage, String activityId, String flg);
 }

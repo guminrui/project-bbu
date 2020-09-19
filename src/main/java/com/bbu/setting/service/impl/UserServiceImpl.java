@@ -27,7 +27,6 @@ public class UserServiceImpl implements UserService {
         List<TblUser> tblUsers1 = tblUserMapper.selectByExample(userExample);
         criteria.andLoginpwdEqualTo(user.getLoginpwd());
         List<TblUser> tblUsers = tblUserMapper.selectByExample(userExample);
-      //  System.out.println(user.getLoginact().length()); 这个加上判断可以确定用户名是否为空
         if (tblUsers1.size()==0){
             throw new ResultExecption(ResultEnum.USERNAME_NOT_FOUND);
         }
@@ -35,14 +34,11 @@ public class UserServiceImpl implements UserService {
             if (tblUsers.size()==0)
             throw new ResultExecption(ResultEnum.NOT_FOUND);
         }
-//        if(tblUsers==null||tblUsers.size()==0){
-//            throw new ResultExecption(ResultEnum.NOT_FOUND);
-//        }
+
         TblUser tblUser = tblUsers.get(0);
         if(tblUser.getLoginact()==null){
                 throw new ResultExecption(ResultEnum.USER_NOT_FOUND);
         }
-   //     if(tblUser.getLoginact()==)
         if (tblUser.getAllowips()!=null){
             if(!tblUser.getAllowips().contains(user.getAllowips())){
                 throw new ResultExecption(ResultEnum.USER_IP_LIMIT);

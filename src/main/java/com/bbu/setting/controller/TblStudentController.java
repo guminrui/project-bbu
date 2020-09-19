@@ -1,12 +1,14 @@
 package com.bbu.setting.controller;
 
 
+import com.bbu.setting.pojo.TblCourse;
 import com.bbu.setting.pojo.TblStudent;
 import com.bbu.setting.pojo.TblUser;
 import com.bbu.setting.service.TblStudentService;
 import com.bbu.util.Result;
 import com.bbu.util.ResultPage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,14 +30,32 @@ public class TblStudentController {
                            @RequestParam(required = false) String name,
                            @RequestParam(required = false) String classandgrade,
                            @RequestParam(required = false) String phone ){
-        ResultPage resultPage = null;
-        resultPage = tblStudentService.queryAll(pageSize,pageNo, name, classandgrade , phone);
-        return Result.OK(resultPage);
+        System.out.println(pageSize+pageNo+name+classandgrade+phone);
+        ResultPage resultPages = null;
+        resultPages = tblStudentService.queryAll(pageSize,pageNo, name, classandgrade , phone);
+        return Result.OK(resultPages);
     }
 
     @RequestMapping("/add")
     public Result addClue(TblStudent tblStudent){
         tblStudentService.addItem(tblStudent);
+        return Result.OK();
+    }
+    @RequestMapping("/del")
+    public Result pagedel(@RequestParam("ids[]") String[] ids){
+        tblStudentService.delItem(ids);
+        return Result.OK();
+    }
+
+    @RequestMapping("/{id}")
+    public Result getActivity(@PathVariable("id") String id){
+        Map resutlMap = tblStudentService.getByItem(id);
+        return  Result.OK(resutlMap);
+    }
+
+    @RequestMapping("/edit")
+    public Result edit(TblStudent tblStudent){
+        this.tblStudentService.editItem(tblStudent);
         return Result.OK();
     }
 

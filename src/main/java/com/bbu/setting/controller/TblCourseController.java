@@ -32,18 +32,17 @@ public class TblCourseController {
     public Result pageList(int pageSize ,
                            @RequestParam(defaultValue = "1")int pageNo ,
                            @RequestParam(value = "name" , required = false) String name ,
-                           @RequestParam(value = "owner" , required = false) String owner,
                            @RequestParam(value = "stardate" , required = false) String stardate ,
                            @RequestParam(value = "enddate" , required = false) String enddate){
         ResultPage resultPage = null;
-            resultPage = tblCourseService.pageItem(pageSize, pageNo, name, owner, stardate, enddate);
+            resultPage = tblCourseService.pageItem(pageSize, pageNo, name,  stardate, enddate);
        //     System.out.println(resultPage);
             return Result.OK(resultPage);
     }
     @RequestMapping("/del")
     public Result pagedel(@RequestParam("ids[]") String[] ids){
         tblCourseService.delItem(ids);
-       return Result.OK();
+        return Result.OK();
     }
 
     @RequestMapping("/{id}")

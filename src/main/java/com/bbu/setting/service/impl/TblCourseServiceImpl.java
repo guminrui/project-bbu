@@ -40,29 +40,13 @@ public class TblCourseServiceImpl implements TblCourseService {
             tblCourseMapper.insertSelective(tblCourse);
     }
     @Override
-        public ResultPage pageItem(int pageSize, int pageNo, String name, String owner, String startdate, String enddate){
+        public ResultPage pageItem(int pageSize, int pageNo, String name, String startdate, String enddate){
             TblCourseExample tblCourseExample = new TblCourseExample();
             TblCourseExample.Criteria criteria = tblCourseExample.createCriteria();
             if (name!=null&&!"".equals(name)){
                 criteria.andCoursenameLike("%"+name+"%");
             }
-//            if (owner!=null&&!"".equals(owner)){
-//                TblUserExample tblUserExample = new TblUserExample();
-//                TblUserExample.Criteria criteria1 = tblUserExample.createCriteria();
-//                criteria1.andNameLike("%"+owner+"%");
-//                //获取指定名称通过条件查询
-//                List<TblUser> tblUsers = tblUserMapper.selectByExample(tblUserExample);
-//                List<String> ids = new ArrayList<String>();
-//                if (tblUsers == null || tblUsers.size() == 0) {
-//                    throw new ResultExecption(ResultEnum.NOT_FOUND);
-//                }
-//                //得到ID之后遍历到集合中
-//                for (TblUser tblUser : tblUsers) {
-//                    ids.add(tblUser.getId());
-//                }
-//                //查询出来的结果放在活动表中（在Owner中有的在放）
-//                criteria.andOwnerIn(ids);
-//            }
+
             //判断开始时间
             if (startdate!=null&&!"".equals(startdate)){
                 criteria.andStartdateLike("%"+startdate+"%");
@@ -76,14 +60,7 @@ public class TblCourseServiceImpl implements TblCourseService {
 
             //把封装好的条件放在条件查询中进行查询
         List<TblCourse> tblCourses = tblCourseMapper.selectByExample(tblCourseExample);
-//            if (Utils.isListNull(tblCourses)){
-//                throw new ResultExecption(ResultEnum.FILE_NOT_FOUND);
-//            }
-//        for (TblCourse tblCourse : tblCourses) {
-//            //把条件放在这里，进行插入。对tblActivities结果进行封装
-//            TblUser tblUser = tblUserMapper.selectByPrimaryKey(tblCourse.getOwner());
-//            tblActivity.setOwner(tblUser.getName());
-//        }
+
         PageInfo<TblCourse> pageInfo = new PageInfo<TblCourse>(tblCourses);
         ResultPage<TblCourse> tblCourseResultPage = new ResultPage<TblCourse>();
         tblCourseResultPage.setRows(pageInfo.getList());
@@ -114,12 +91,9 @@ public class TblCourseServiceImpl implements TblCourseService {
         if (tblCourse == null){
             throw new ResultExecption(ResultEnum.NOT_FOUND);
         }
-//        List<TblUser> tblUsers = tblUserMapper.selectByExample(null);
-//        if (Utils.isListNull(tblUsers)){
-//            throw new ResultExecption(ResultEnum.NOT_FOUND);
-//        }
+
         Map map = new HashMap();
-//        map.put("users",tblUsers);
+
         map.put("act",tblCourse);
 
         return map;
@@ -142,11 +116,7 @@ public class TblCourseServiceImpl implements TblCourseService {
         if (tblCourse==null){
             throw new ResultExecption(ResultEnum.NOT_FOUND);
         }else{
-//            TblUser tblUser = tblUserMapper.selectByPrimaryKey(tblCourse.getOwner());
-//            if (tblUser==null){
-//                throw new ResultExecption(ResultEnum.NOT_FOUND);
-//            }else{
-//                tblCourse.setOwner(tblUser.getName());
+
                 return tblCourse;
         }
     }
